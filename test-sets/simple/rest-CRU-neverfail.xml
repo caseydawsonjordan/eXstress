@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "../../lib/tsung-1.0.dtd">
+
+<!--
+NOTE: This test plan is designed so that it should never fail. 
+It shoud also never return an HTTP code that indicates a failure.
+
+The only HTTP codes that should be returned are:
+
+200 (OK)
+201 (Created)
+204 (No Content)
+207 (Multi-Status WebDAV RRC 4918)
+
+
+In this testplan, the user:
+
+
+
+
+--><tsung loglevel="notice" version="1.0" dumptraffic="false" backend="text">
+
+  <!-- Client side setup -->
+  <clients>
+    <client host="localhost" use_controller_vm="true" cpu="1" type="machine" maxusers="10000" weight="1"/>
+  </clients>
+  
+  <!-- Server side setup -->
+<servers>
+  <server host="localhost" port="8080" type="tcp"/>
+</servers>
+
+  <!-- to start os monitoring (cpu, network, memory). Use an erlang
+  agent on the remote machine or SNMP. erlang is the default --> 
+  <!--<monitoring>
+    <monitor host="myserver" type="snmp"></monitor>
+  </monitoring>-->
+  
+<!-- Always quit after 5 min -->
+  <load duration="5" unit="minute" loop="0"> 
+  <!-- several arrival phases can be set: for each phase, you can set
+  the mean inter-arrival time between new clients and the phase
+  duration -->
+ 
+   <arrivalphase phase="1" duration="5" unit="minute">
+     <users maxnumber="1000" interarrival="1" unit="second"/>
+   </arrivalphase>
+  </load>
+
+  <options>
+  	<option name="file_server" id="userdb" value="users.txt"/>
+  </options>
+
+  <!-- start a session for a http user. the probability is the
+  frequency of this type os session. The sum of all session's
+  probabilities must be 100 -->
+
+ <sessions>
+ 	<session name="rec20120523-1343" probability="100" type="ts_http">
+			<setdynvars sourcetype="erlang" callback="ts_user_server:get_unique_id">
+				<var name="rand_string"/>
+			</setdynvars>
+			<setdynvars sourcetype="file" fileid="userdb" delimiter=";" order="iter">
+				<var name="username" />
+				<var name="password" />
+			</setdynvars>
+		
+			<request subst="true">
+				<http url="/exist/rest/db/" version="1.1" method="GET">
+					<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+					
+				</http>
+			</request>
+ 		
+		<!-- 	Create a file in the static collection	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/static1/topic-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;topic id=&#34;topic-1&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;   xsi:noNamespaceSchemaLocation=&#34;urn:oasis:names:tc:xml:xsd:topic.xsd&#34;&gt;   &lt;title&gt;Topic title&lt;/title&gt;   &lt;body&gt;     &lt;p&gt;Topic paragraph&lt;/p&gt;   &lt;/body&gt; &lt;/topic&gt; "
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+		<!-- 	Move that file into static2	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:move('/db/test-collections/static1/', '/db/test-collections/static2/', 'topic-%%_rand_string%%.xml')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 	
+ 		
+		<!-- 	Create a randomized collection	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:create-collection('/db/test-collections/', 'test-%%_rand_string%%')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+		<!-- 	Store a file in that collection	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/test-%%_rand_string%%/topic-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;topic id=&#34;topic-1&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;   xsi:noNamespaceSchemaLocation=&#34;urn:oasis:names:tc:xml:xsd:topic.xsd&#34;&gt;   &lt;title&gt;Topic title&lt;/title&gt;   &lt;body&gt;     &lt;p&gt;Topic paragraph&lt;/p&gt;   &lt;/body&gt; &lt;/topic&gt; "
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Move the new collection into static2	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:move('/db/test-collections/test-%%_rand_string%%', '/db/test-collections/static2/')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+		<!-- 	Copy the collection 	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:copy('/db/test-collections/static2/test-%%_rand_string%%', '/db/test-collections/static1/')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Rename the copied collection 	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:rename('/db/test-collections/static1/test-%%_rand_string%%', 'test-%%_rand_string%%--renamed')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		
+		
+ 		
+		<!-- 	Put a large file -->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/test-%%_rand_string%%/semi-big-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents_from_file="./samples/1megabyte.xml"
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+
+		</session>
+ </sessions>
+</tsung>

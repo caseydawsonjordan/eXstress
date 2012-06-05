@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmx:jmx xmlns:jmx="http://exist-db.org/jmx">
+    <jmx:LockManager name="org.exist.management:type=LockManager">
+        <jmx:WaitingThreads>
+            <jmx:row>
+                <jmx:id>/db/test-collections/static1</jmx:id>
+                <jmx:lockMode>READ</jmx:lockMode>
+                <jmx:lockType>COLLECTION</jmx:lockType>
+                <jmx:owner>eXistThread-35</jmx:owner>
+                <jmx:waitingForRead/>
+                <jmx:waitingForWrite/>
+                <jmx:waitingThread>eXistThread-29</jmx:waitingThread>
+            </jmx:row>
+        </jmx:WaitingThreads>
+    </jmx:LockManager>
+</jmx:jmx>

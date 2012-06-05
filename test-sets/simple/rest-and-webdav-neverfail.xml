@@ -1,0 +1,484 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "../../lib/tsung-1.0.dtd">
+
+<!--
+NOTE: This test plan is designed so that it should never fail. 
+It shoud also never return an HTTP code that indicates a failure.
+
+The only HTTP codes that should be returned are:
+
+200 (OK)
+201 (Created)
+204 (No Content)
+207 (Multi-Status WebDAV RRC 4918)
+
+
+In this testplan, the user:
+
+
+
+
+--><tsung loglevel="notice" version="1.0" dumptraffic="false" backend="text">
+
+  <!-- Client side setup -->
+  <clients>
+    <client host="localhost" use_controller_vm="true" cpu="1" type="machine" maxusers="10000" weight="1"/>
+  </clients>
+  
+  <!-- Server side setup -->
+<servers>
+  <server host="localhost" port="8080" type="tcp"/>
+</servers>
+
+  <!-- to start os monitoring (cpu, network, memory). Use an erlang
+  agent on the remote machine or SNMP. erlang is the default --> 
+  <!--<monitoring>
+    <monitor host="myserver" type="snmp"></monitor>
+  </monitoring>-->
+  
+<!-- Always quit after 5 min -->
+  <load duration="5" unit="minute" loop="0"> 
+  <!-- several arrival phases can be set: for each phase, you can set
+  the mean inter-arrival time between new clients and the phase
+  duration -->
+ 
+   <arrivalphase phase="1" duration="10" unit="minute">
+     <users maxnumber="100" interarrival="1" unit="second"/>
+   </arrivalphase>
+  </load>
+
+  <options>
+  	<option name="file_server" id="userdb" value="users.txt"/>
+  </options>
+
+  <!-- start a session for a http user. the probability is the
+  frequency of this type os session. The sum of all session's
+  probabilities must be 100 -->
+
+ <sessions>
+ 	<session name="rec20120523-1343" probability="50" type="ts_http">
+ 		<setdynvars sourcetype="erlang" callback="ts_user_server:get_unique_id">
+ 			<var name="rand_string"/>
+ 		</setdynvars>
+ 		<setdynvars sourcetype="file" fileid="userdb" delimiter=";" order="iter">
+ 			<var name="username" />
+ 			<var name="password" />
+ 		</setdynvars>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/rest/db/" version="1.1" method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Create a file in the static collection	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/static1/topic-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;topic id=&#34;topic-1&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;   xsi:noNamespaceSchemaLocation=&#34;urn:oasis:names:tc:xml:xsd:topic.xsd&#34;&gt;   &lt;title&gt;Topic title&lt;/title&gt;   &lt;body&gt;     &lt;p&gt;Topic paragraph&lt;/p&gt;   &lt;/body&gt; &lt;/topic&gt; "
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Move that file into static2	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:move('/db/test-collections/static1/', '/db/test-collections/static2/', 'topic-%%_rand_string%%.xml')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Delete that file now in static2	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/static2/topic-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				
+ 				method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Create a randomized collection	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:create-collection('/db/test-collections/', 'test-%%_rand_string%%')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Store a file in that collection	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/test-%%_rand_string%%/topic-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt; &lt;topic id=&#34;topic-1&#34; xmlns:xsi=&#34;http://www.w3.org/2001/XMLSchema-instance&#34;   xsi:noNamespaceSchemaLocation=&#34;urn:oasis:names:tc:xml:xsd:topic.xsd&#34;&gt;   &lt;title&gt;Topic title&lt;/title&gt;   &lt;body&gt;     &lt;p&gt;Topic paragraph&lt;/p&gt;   &lt;/body&gt; &lt;/topic&gt; "
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Move the new collection into static2	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:move('/db/test-collections/test-%%_rand_string%%', '/db/test-collections/static2/')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Copy the collection 	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:copy('/db/test-collections/static2/test-%%_rand_string%%', '/db/test-collections/static1/')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Rename the copied collection 	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/?_query=xmldb:rename('/db/test-collections/static1/test-%%_rand_string%%', 'test-%%_rand_string%%--renamed')"
+ 				version="1.1"
+ 				
+ 				method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Delete the renmaed collection 	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/static1/test-%%_rand_string%%--renamed"
+ 				version="1.1"
+ 				
+ 				method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Delete the collection we just moved	-->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/static2/test-%%_rand_string%%/"
+ 				version="1.1"
+ 				
+ 				method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Put a large file -->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/test-%%_rand_string%%/semi-big-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents_from_file="./samples/1megabyte.xml"
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		<!-- 	Delete the large file -->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/rest/db/test-collections/test-%%_rand_string%%/semi-big-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 	</session>
+ 	<session name="rec20120529-1449" probability="50" type="ts_webdav">
+ 		<!--	Setup a dynamic variable which is a random id that can be added to any request string		-->
+ 		<setdynvars sourcetype="erlang" callback="ts_user_server:get_unique_id">
+ 			<var name="rand_string"/>
+ 		</setdynvars>
+ 		<!--	Setup a dynamic variable which pulls users from the users definition file.		-->
+ 		<setdynvars sourcetype="file" fileid="userdb" delimiter=";" order="iter">
+ 			<var name="username"/>
+ 			<var name="password"/>
+ 		</setdynvars>
+ 		<request subst="true">
+ 			<http url="http://localhost:8080/exist/webdav/db/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 				
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%" version="1.1"
+ 				method="MKCOL">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+ 				&lt;!DOCTYPE topic PUBLIC &quot;-//OASIS//DTD DITA Topic//EN&quot; &quot;topic.dtd&quot;&gt;
+ 				&lt;topic id=&quot;topic_rgg_fgm_kg&quot;&gt;
+ 				&lt;title&gt;Topic title&lt;/title&gt;
+ 				&lt;body&gt;
+ 				&lt;p&gt;Topic paragraph&lt;/p&gt;
+ 				&lt;/body&gt;
+ 				&lt;/topic&gt;
+ 				"
+ 				method="PUT">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1" method="GET">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!--<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 			version="1.1"
+ 			contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:lockinfo xmlns:D=&quot;DAV:&quot;&gt;&lt;D:lockscope xmlns:D=&quot;DAV:&quot;&gt;&lt;D:exclusive xmlns:D=&quot;DAV:&quot;/&gt;&lt;/D:lockscope&gt;&lt;D:locktype xmlns:D=&quot;DAV:&quot;&gt;&lt;D:write xmlns:D=&quot;DAV:&quot;/&gt;&lt;/D:locktype&gt;&lt;D:owner xmlns:D=&quot;DAV:&quot;&gt;casey&lt;/D:owner&gt;&lt;/D:lockinfo&gt;"
+ 			content_type="text/xml; charset=utf-8" method="LOCK">
+ 			<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			
+ 			<http_header name="timeout" value="Second-300"/>
+ 			</http>
+ 			</request>-->
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+ 				&lt;!DOCTYPE topic PUBLIC &quot;-//OASIS//DTD DITA Topic//EN&quot; &quot;topic.dtd&quot;&gt;
+ 				&lt;topic id=&quot;topic_rgg_fgm_kg&quot;&gt;
+ 				&lt;title&gt;Topic title&lt;/title&gt;
+ 				&lt;body&gt;
+ 				&lt;p&gt;Topic paragraph&lt;/p&gt;
+ 				&lt;p&gt;Just a simple webdav test&lt;/p&gt;
+ 				&lt;/body&gt;
+ 				&lt;/topic&gt;
+ 				"
+ 				method="PUT">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!--<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 			version="1.1" method="UNLOCK">
+ 			<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			
+ 			</http>
+ 			</request>-->
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%.dita"
+ 				version="1.1" method="MOVE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="overwrite" value="F"/>
+ 				
+ 				<http_header name="destination"
+ 					value="http://localhost:8080/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%-renamed.dita"
+ 				/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%-renamed.dita"
+ 				version="1.1" method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%" version="1.1"
+ 				method="MOVE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="overwrite" value="F"/>
+ 				
+ 				<http_header name="destination"
+ 					value="http://localhost:8080/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed"
+ 				/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<!-- 	Put a large file -->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed/semi-big-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				contents_from_file="./samples/1megabyte.xml"
+ 				method="PUT" content_type="application/xml">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		<!-- 	Delete the large file -->
+ 		<request subst="true">
+ 			<http
+ 				url="/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed/semi-big-%%_rand_string%%.xml"
+ 				version="1.1"
+ 				method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed" version="1.1"
+ 				method="DELETE">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 			</http>
+ 		</request>
+ 		
+ 		<request subst="true">
+ 			<http url="/exist/webdav/db/" version="1.1"
+ 				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
+ 				content_type="text/xml; charset=utf-8" method="PROPFIND">
+ 				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
+ 				<http_header name="depth" value="1"/>
+ 			</http>
+ 		</request>
+ 		
+ 		
+ 		
+ 	</session>
+ 	
+ </sessions>
+</tsung>
