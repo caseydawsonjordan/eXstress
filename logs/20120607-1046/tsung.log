@@ -1,0 +1,72 @@
+# stats: dump at 1339080390
+stats: users 9 9
+stats: users_count 9 9
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 9 9
+# stats: dump at 1339080400
+stats: users 15 15
+stats: users_count 6 15
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 14 23
+# stats: dump at 1339080410
+stats: users 28 28
+stats: users_count 13 28
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 19 42
+# stats: dump at 1339080420
+stats: users 45 45
+stats: users_count 17 45
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 39 81
+# stats: dump at 1339080430
+stats: users 56 56
+stats: users_count 11 56
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 34 115
+# stats: dump at 1339080440
+stats: users 61 61
+stats: users_count 5 61
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 30 145
+# stats: dump at 1339080450
+stats: users 57 61
+stats: session 9 60017.495768229164 6.01234345759874 60030.9169921875 60010.205078125 0 0
+stats: users_count 5 66
+stats: finish_users_count 9 9
+stats: error_connect_econnrefused 36 181
+stats: error_abort_max_conn_retries 9 9
+# stats: dump at 1339080460
+stats: users 61 63
+stats: session 6 60016.315673828125 1.2079093315264098 60030.9169921875 60010.205078125 60017.495768229164 9
+stats: users_count 10 76
+stats: finish_users_count 6 15
+stats: error_connect_econnrefused 32 213
+stats: error_abort_max_conn_retries 6 15
+# stats: dump at 1339080470
+stats: users 60 63
+stats: session 13 60016.462928185094 2.337728150848559 60030.9169921875 60008.7490234375 60017.02373046875 15
+stats: users_count 12 88
+stats: finish_users_count 13 28
+stats: error_connect_econnrefused 40 253
+stats: error_abort_max_conn_retries 13 28
+# stats: dump at 1339080480
+stats: users 52 63
+stats: session 17 60015.933565027575 1.6682727332971876 60030.9169921875 60008.7490234375 60016.76335797991 28
+stats: users_count 9 97
+stats: finish_users_count 17 45
+stats: error_connect_econnrefused 43 296
+stats: error_abort_max_conn_retries 17 45
+# stats: dump at 1339080490
+stats: users 52 63
+stats: session 11 60014.93619051846 2.2819542641496064 60030.9169921875 60008.7490234375 60016.44988064236 45
+stats: users_count 11 108
+stats: finish_users_count 11 56
+stats: error_connect_econnrefused 40 336
+stats: error_abort_max_conn_retries 11 56
+# stats: dump at 1339080500
+stats: users 54 63
+stats: session 5 60015.143798828125 1.9620432802124244 60030.9169921875 60008.7490234375 60016.152548653736 56
+stats: users_count 7 115
+stats: finish_users_count 5 61
+stats: error_connect_econnrefused 35 371
+stats: error_abort_max_conn_retries 5 61

@@ -1,0 +1,112 @@
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) Config server started, logdir is "/media/Storage/Development/exist/eXstress/logs/20120606-1729"
+ 
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+              ts_mon:(5:<0.52.0>) starting monitor, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+              ts_mon:(5:<0.54.0>) Init, log dir is "/media/Storage/Development/exist/eXstress/logs/20120606-1729"
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+              ts_mon:(5:<0.54.0>) starting monitor
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.52.0>) starting stats server, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.56.0>) starting ts_stats_mon stats server
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.52.0>) starting request stats server, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.57.0>) starting dedicated stats server for request 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.52.0>) starting page stats server, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.58.0>) starting dedicated stats server for page 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.52.0>) starting connect stats server, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.59.0>) starting dedicated stats server for connect 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.52.0>) starting transaction stats server, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+        ts_stats_mon:(5:<0.60.0>) starting transaction stats server
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+     ts_match_logger:(5:<0.52.0>) starting match logger, global 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+     ts_match_logger:(5:<0.61.0>) starting match logger
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+     ts_match_logger:(5:<0.61.0>) starting match logger
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+           ts_config:(5:<0.53.0>) Reading config file: /media/Storage/Development/exist/eXstress/test-sets/simple/generated-test-plan.xml
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+           ts_config:(5:<0.53.0>) Session name for id 1 is "rec20120529-1449"
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+           ts_config:(5:<0.53.0>) Session type: persistent=true, bidi=false
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) SYSINFO:Tsung version: 1.4.2
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) SYSINFO:Erlang version: Erlang R13B03 (erts-5.7.4) [source] [smp:8:8] [rq:8] [async-threads:16] [hipe] [kernel-poll:true]
+
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) SYSINFO:System architecture i686-pc-linux-gnu
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) SYSINFO:Current path: /usr/lib/erlang/lib/tsung-1.4.2/ebin/tsung.beam
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) Set max duration of test: 300 s 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+       ts_job_notify:(5:<0.65.0>) No listen port defined, can't open listening socket 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+           ts_os_mon:(5:<0.50.0>) os_mon disabled
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+              ts_mon:(5:<0.54.0>) Activate clients with text backend
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) Start a launcher on the controller beam localhost
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+  ts_launcher_static:(5:<0.88.0>) Launch msg receive ("localhost")
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+         ts_launcher:(5:<0.89.0>) Launch msg receive ("localhost")
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+              ts_mon:(5:<0.54.0>) A launcher has started
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) All remote beams started, sync 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+    ts_config_server:(5:<0.53.0>) New arrival phase 1 for client "localhost" (last ? true): will start 300 users
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+         ts_launcher:(5:<0.89.0>) Expected duration of first phase: 300.0 sec (300 users) 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+         ts_launcher:(4:<0.89.0>) Negative Warm timeout !!! Check if client  machines are synchronized (ntp ?)
+Anyway, start launcher NOW! 
+
+=INFO REPORT==== 6-Jun-2012::17:29:28 ===
+         ts_launcher:(5:<0.89.0>) Activate launcher (300 users) in 1264 msec 

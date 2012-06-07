@@ -1,0 +1,5 @@
+# stats: dump at 1339080261
+stats: users 7 7
+stats: users_count 7 7
+stats: finish_users_count 0 0
+stats: error_connect_econnrefused 7 7
