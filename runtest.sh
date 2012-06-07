@@ -52,18 +52,6 @@ get_real_script_path()
 SCRIPT_PATH=$(get_real_script_path $0)
 SCRIPT_DIR=$(dirname $SCRIPT_PATH)
 
-on_exit()
-{
-	
-	test_cleanup
-	tsung stop > /dev/null
-	log_exist_status > /dev/null
-	# Need to exit the script explicitly when done.
-	# Otherwise the script would live on, until system
-	# realy goes down, and KILL signals are send.
-	#
-	exit 0
-}
 
 test_cleanup()
 {
@@ -139,21 +127,23 @@ sed -i "1i<!DOCTYPE tsung SYSTEM \"$DTD_LOCATION\">" $GEN_TEST_PLAN;
 
 log_exist_status()
 {
-	echo $(wget -T 100 -t 1 "$JMXURL" -O $STATUS_LOG -o /dev/stdout )
+	S_LOG=$1;
+	echo $(wget -T 100 -t 1 "$JMXURL" -O $S_LOG -o /dev/stdout )
 }
 
 TSUNG_LOG_ACTUALLY="$LOG_DIR/$CUR_DATETIME";
+STATUS_LOG="$TSUNG_LOG_ACTUALLY/exist_status.xml";
 
 monitor_exist()
 {
 	result=""
 	sleep 5;
-	STATUS_LOG="$TSUNG_LOG_ACTUALLY/exist_status.xml";
+	
 	#echo -e "\nLogging eXist status to: $STATUS_LOG\n";
 	
 	while [ "$(tsung status | grep 'not started')" = "" ];
 	do
-	result=$(log_exist_status)
+	result=$(log_exist_status $STATUS_LOG)
 	
 	
 	if [ "$(echo $result | grep '200 OK' )" = "" ] 
@@ -186,5 +176,18 @@ cd $TEST_DIR;
 
 tsung -f "$GEN_TEST_PLAN" -l "$LOG_DIR" -w 0 start 
 
+
+on_exit()
+{
+	
+	test_cleanup
+	tsung stop > /dev/null
+	log_exist_status $STATUS_LOG > /dev/null
+	# Need to exit the script explicitly when done.
+	# Otherwise the script would live on, until system
+	# realy goes down, and KILL signals are send.
+	#
+	exit 0
+}
 
 trap 'on_exit' INT TERM EXIT
