@@ -1,4 +1,4 @@
 <?xml version="1.0"?> <!DOCTYPE test SYSTEM "../lib/config.dtd"> 
 <test name="webdav-neverfail">
-	<plan src="../test-plans/simple/webdav-CRUD-neverfail.xml"/>
+	<plan src="../plans/simple/webdav-CRUD-neverfail.xml"/>
 </test>

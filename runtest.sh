@@ -12,6 +12,8 @@ print_usage(){
           	echo -e ""
 }
 
+set -e;
+
 get_real_script_path()
 {
 	case $0 in
@@ -50,17 +52,23 @@ get_real_script_path()
 SCRIPT_PATH=$(get_real_script_path $0)
 SCRIPT_DIR=$(dirname $SCRIPT_PATH)
 
-on_die()
+on_exit()
 {
-	# print message
-	#
-	echo "Aborting..."
-	tsung stop
+	
+	test_cleanup
+	tsung stop > /dev/null
+	log_exist_status > /dev/null
 	# Need to exit the script explicitly when done.
 	# Otherwise the script would live on, until system
 	# realy goes down, and KILL signals are send.
 	#
 	exit 0
+}
+
+test_cleanup()
+{
+	rm $GEN_TEST_PLAN;
+	cd $CUR_DIR;
 }
 
 DEBUG="true";
@@ -113,7 +121,7 @@ fi
 CUR_DATETIME=$(date '+%Y%m%d-%H%M')
 
 # Generate the test plan
-GEN_TEST_PLAN=$(java  -jar ./lib/saxon/saxon9he.jar $TEST_PLAN lib/test-modifier.xsl date-time="$CUR_DATETIME")
+GEN_TEST_PLAN=$(java  -jar ./lib/saxon/saxon9he.jar $TEST_PLAN lib/test-generator.xsl date-time="$CUR_DATETIME")
 
 
 TEST_DIR=$(dirname $GEN_TEST_PLAN)
@@ -167,7 +175,7 @@ then
 	exit
 fi
 
-trap 'on_die' TERM
+
 
 monitor_exist &
 
@@ -176,12 +184,7 @@ CUR_DIR=$(pwd);
 
 cd $TEST_DIR;
 
-tsung -f "$GEN_TEST_PLAN" -l "$LOG_DIR" -w 0 start &
+tsung -f "$GEN_TEST_PLAN" -l "$LOG_DIR" -w 0 start 
 
-wait
 
-log_exist_status
-
-cd $CUR_DIR;
-
-rm $GEN_TEST_PLAN;
+trap 'on_exit' INT TERM EXIT

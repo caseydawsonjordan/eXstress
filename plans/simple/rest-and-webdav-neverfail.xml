@@ -215,7 +215,7 @@ In this testplan, the user:
  			<var name="password"/>
  		</setdynvars>
  		<request subst="true">
- 			<http url="http://localhost:8080/exist/webdav/db/" version="1.1"
+ 			<http url="/exist/webdav/db/" version="1.1"
  				contents="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;&lt;D:propfind xmlns:D=&quot;DAV:&quot;&gt;&lt;D:prop&gt;&lt;D:getlastmodified/&gt;&lt;D:getcontentlength/&gt;&lt;D:resourcetype/&gt;&lt;D:supportedlock/&gt;&lt;D:lockdiscovery/&gt;&lt;/D:prop&gt;&lt;/D:propfind&gt;"
  				content_type="text/xml; charset=utf-8" method="PROPFIND">
  				<www_authenticate userid="%%_username%%" passwd="%%_password%%"/>
@@ -375,7 +375,7 @@ In this testplan, the user:
  				<http_header name="overwrite" value="F"/>
  				
  				<http_header name="destination"
- 					value="http://localhost:8080/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%-renamed.dita"
+ 					value="/exist/webdav/db/davstress-test-collection%%_rand_string%%/untitled-%%_rand_string%%-renamed.dita"
  				/>
  			</http>
  		</request>
@@ -415,7 +415,7 @@ In this testplan, the user:
  				<http_header name="overwrite" value="F"/>
  				
  				<http_header name="destination"
- 					value="http://localhost:8080/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed"
+ 					value="/exist/webdav/db/davstress-test-collection%%_rand_string%%-renamed"
  				/>
  			</http>
  		</request>
