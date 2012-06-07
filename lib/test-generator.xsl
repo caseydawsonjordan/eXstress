@@ -3,8 +3,8 @@
 	version="2.0">
 	
 	<xsl:param name="date-time"/>
-	<xsl:variable name="tm" select="/test/modifiers"/>
-	<xsl:variable name="tsung-plan" select="doc(resolve-uri(/test/plan/@src,document-uri(.) ))/tsung"/>
+	<xsl:variable name="tm" select="/test-runner/modifiers"/>
+	<xsl:variable name="tsung-plan" select="doc(resolve-uri(/test-runner/plan/@src,document-uri(.) ))/tsung"/>
 	<xsl:variable name="generated-test-src" select="resolve-uri(concat($date-time,'-gen-test.xml'), document-uri(root($tsung-plan)))"/>
 	
 	<xsl:output method="xml" indent="yes" name="xml" omit-xml-declaration="yes"/>

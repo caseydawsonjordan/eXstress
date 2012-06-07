@@ -1,4 +1,14 @@
-<?xml version="1.0"?> <!DOCTYPE test SYSTEM "../lib/config.dtd"> 
-<test name="webdav-neverfail">
+<?xml version="1.0"?> <!DOCTYPE test-runner SYSTEM "../lib/config.dtd"> 
+<test-runner name="webdav-neverfail">
 	<plan src="../plans/simple/webdav-CRUD-neverfail.xml"/>
-</test>
+	<modifiers>
+		<servers>
+			<server host="myserver.com" port="9000" type="tcp"/>
+		</servers>
+		<load>
+			<arrivalphase duration="5" phase="1" unit="minute">
+				<users maxnumber="1000" arrivalrate="1" unit="minute"/>
+			</arrivalphase>
+		</load>
+	</modifiers>
+</test-runner>

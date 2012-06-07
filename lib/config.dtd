@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<!ELEMENT test (plan, modifiers?)>
+<!ELEMENT test-runner (plan, modifiers?)>
 
-<!ATTLIST test
+<!ATTLIST test-runner
      name CDATA #REQUIRED
     	>
 
@@ -12,7 +12,7 @@
      src CDATA #REQUIRED
     	>
      
-<!ELEMENT modifiers (information?, clients, servers, monitoring?, load)>
+<!ELEMENT modifiers (information?, clients?, servers?, monitoring?, load?)>
 
 <!ELEMENT information (name|description|username|organisation)*>
 
