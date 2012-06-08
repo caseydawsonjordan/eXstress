@@ -3,8 +3,9 @@
 	version="2.0">
 	
 	<xsl:param name="date-time"/>
-	<xsl:variable name="tm" select="/test-runner/modifiers"/>
-	<xsl:variable name="tsung-plan" select="doc(resolve-uri(/test-runner/plan/@src,document-uri(.) ))/tsung"/>
+	
+	<xsl:variable name="plan" select="/test-runner/plan"/>
+	<xsl:variable name="tsung-plan" select="doc(resolve-uri($plan/@src,document-uri(.) ))/tsung"/>
 	<xsl:variable name="generated-test-src" select="resolve-uri(concat($date-time,'-gen-test.xml'), document-uri(root($tsung-plan)))"/>
 	
 	<xsl:output method="xml" indent="yes" name="xml" omit-xml-declaration="yes"/>
@@ -15,15 +16,18 @@
 			<xsl:message terminate="yes">The test plan you specified is not valid.</xsl:message>
 		</xsl:if>
 		<xsl:result-document href="{$generated-test-src}" format="xml">
-			<xsl:apply-templates select="$tsung-plan"></xsl:apply-templates>
+			<xsl:apply-templates select="$tsung-plan">
+				<xsl:with-param name="modifiers" select="$plan/modifiers"/>
+			</xsl:apply-templates>
 		</xsl:result-document>
 		<xsl:value-of select="string(replace($generated-test-src, 'file:', ''))"/>
 	</xsl:template>
 	
 	<xsl:template match="tsung/@*">
+		<xsl:param name="modifiers"/>
 		<xsl:variable name="att_name" select="local-name(.)"/>
 		<xsl:variable name="att_ns" select="namespace-uri(.)"/>
-		<xsl:variable name="overwrite-att" select="$tm/@*[local-name(.) = $att_name and namespace-uri(.) = $att_ns]"/>
+		<xsl:variable name="overwrite-att" select="$modifiers/@*[local-name(.) = $att_name and namespace-uri(.) = $att_ns]"/>
 		
 		<xsl:choose>
 			<xsl:when test="$overwrite-att">
@@ -36,9 +40,10 @@
 	</xsl:template>	
 	
 	<xsl:template match="tsung/*">
+		<xsl:param name="modifiers"/>
 		<xsl:variable name="node_name" select="local-name(.)"/>
 		<xsl:variable name="node_ns" select="namespace-uri(.)"/>
-		<xsl:variable name="overwrite" select="$tm/*[local-name(.) = $node_name and namespace-uri(.) = $node_ns]"/>
+		<xsl:variable name="overwrite" select="$modifiers/*[local-name(.) = $node_name and namespace-uri(.) = $node_ns]"/>
 		<xsl:choose>
 			<xsl:when test="$overwrite">
 				<xsl:copy-of select="$overwrite"/>
@@ -63,8 +68,11 @@
 	
 	
 	<xsl:template match="@*|node()">
+		<xsl:param name="modifiers"/>
 		<xsl:copy>
-			<xsl:apply-templates select="@*|node()"/>
+			<xsl:apply-templates select="@*|node()">
+				<xsl:with-param name="modifiers" select="$modifiers"/>
+			</xsl:apply-templates>
 		</xsl:copy>
 	</xsl:template>
 	

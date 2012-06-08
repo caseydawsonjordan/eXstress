@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
-<!ELEMENT test-runner (plan, modifiers?)>
+<!ELEMENT test-runner (plan)>
 
 <!ATTLIST test-runner
      name CDATA #REQUIRED
     	>
 
-<!ELEMENT plan EMPTY>
+<!ELEMENT plan (modifiers?)>
 
 <!ATTLIST plan
      src CDATA #REQUIRED
