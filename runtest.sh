@@ -9,6 +9,7 @@ print_usage(){
            	echo -e "";
            	echo -e "	-o	<file>             Write generated test-plan to file and don't start tests.";
           	echo -e "	-j	<jmx-url>          The url to monitor for eXists jmx status. Default is $JMXURL";
+          	echo -e "	-l  <log-dir>          Specify a custom directory to write logs directories to.";
           	echo -e ""
 }
 
@@ -62,8 +63,10 @@ test_cleanup()
 DEBUG="true";
 
 JMXURL="localhost:8080/exist/status?c=locking";
+LOG_DIR="$SCRIPT_DIR/logs/";
+
 # Parse command line options.
-while getopts ho:m: OPT; do
+while getopts ho:m:l: OPT; do
     case "$OPT" in
         h)
             print_usage
@@ -78,6 +81,9 @@ while getopts ho:m: OPT; do
 	        ;;
         o)
         	WRITE_TEST_PLAN=$OPTARG;
+        ;;
+        l) 
+        	LOG_DIR=$OPTARG;
         ;;
        
         \?)
@@ -109,7 +115,7 @@ fi
 CUR_DATETIME=$(date '+%Y%m%d-%H%M')
 
 # Generate the test plan
-GEN_TEST_PLAN=$(java  -jar ./lib/saxon/saxon9he.jar $TEST_PLAN lib/test-generator.xsl date-time="$CUR_DATETIME")
+GEN_TEST_PLAN=$(java  -jar $SCRIPT_DIR/lib/saxon/saxon9he.jar $TEST_PLAN $SCRIPT_DIR/lib/test-generator.xsl date-time="$CUR_DATETIME")
 
 
 TEST_DIR=$(dirname $GEN_TEST_PLAN)
@@ -117,7 +123,7 @@ TEST_DIR=$(dirname $GEN_TEST_PLAN)
 
 #Use datetime to find real log location for tsung, MUST BE IN FORMAT YYYYMMDD-HHMM
 
-LOG_DIR="$SCRIPT_DIR/logs/";
+
 
 mkdir -p $LOG_DIR;
 
