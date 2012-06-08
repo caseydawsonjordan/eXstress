@@ -5,7 +5,7 @@
 	<xsl:param name="date-time"/>
 	
 	<xsl:variable name="plan" select="/test-runner/plan"/>
-	<xsl:variable name="tsung-plan" select="doc(resolve-uri($plan/@src,document-uri(.) ))/tsung"/>
+	<xsl:variable name="tsung-plan" select="document($plan/@src,$plan)/tsung"/>
 	<xsl:variable name="generated-test-src" select="resolve-uri(concat($date-time,'-gen-test.xml'), document-uri(root($tsung-plan)))"/>
 	
 	<xsl:output method="xml" indent="yes" name="xml" omit-xml-declaration="yes"/>
