@@ -10,6 +10,7 @@ print_usage(){
            	echo -e "	-o	<file>             Write generated test-plan to file and don't start tests.";
           	echo -e "	-j	<jmx-url>          The url to monitor for eXists jmx status. Default is $JMXURL";
           	echo -e "	-l  <log-dir>          Specify a custom directory to write logs directories to.";
+          	echo -e "	-z <output-zip-name>   Compress log directory and write to zip file.
           	echo -e ""
 }
 
@@ -64,9 +65,10 @@ DEBUG="true";
 
 JMXURL="localhost:8080/exist/status?c=locking";
 LOG_DIR="$SCRIPT_DIR/logs/";
+ZIP="";
 
 # Parse command line options.
-while getopts ho:j:l: OPT; do
+while getopts ho:j:l:z: OPT; do
     case "$OPT" in
         h)
             print_usage
@@ -82,6 +84,9 @@ while getopts ho:j:l: OPT; do
         ;;
         l) 
         	LOG_DIR=$OPTARG;
+        ;;
+        z)
+        	ZIP=$OPTARG;
         ;;
        
         \?)
@@ -201,6 +206,12 @@ on_exit()
 	tsung stop > /dev/null
 	log_exist_status $STATUS_LOG > /dev/null
 	echo "</status>" >> $STATUS_LOG
+	
+	if [ "$ZIP" != "" ]
+	then
+		zip -r $ZIP $TSUNG_LOG_ACTUALLY
+	fi
+	
 	# Need to exit the script explicitly when done.
 	# Otherwise the script would live on, until system
 	# realy goes down, and KILL signals are send.
