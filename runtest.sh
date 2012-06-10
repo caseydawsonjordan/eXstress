@@ -66,15 +66,13 @@ JMXURL="localhost:8080/exist/status?c=locking";
 LOG_DIR="$SCRIPT_DIR/logs/";
 
 # Parse command line options.
-while getopts ho:m:l: OPT; do
+while getopts ho:j:l: OPT; do
     case "$OPT" in
         h)
             print_usage
             exit 0
            ;;
-        m)
-            TEST_MODIFIER=$OPTARG
-            ;;
+        
             
 	     j)
 	        JMXURL=$OPTARG
@@ -120,12 +118,17 @@ GEN_TEST_PLAN=$(java  -jar $SCRIPT_DIR/lib/saxon/saxon9he.jar $TEST_PLAN $SCRIPT
 
 TEST_DIR=$(dirname $GEN_TEST_PLAN)
 
+#Make logdir absolute
+LOG_DIR=$(readlink -m $LOG_DIR)
+echo $LOG_DIR;
 
 #Use datetime to find real log location for tsung, MUST BE IN FORMAT YYYYMMDD-HHMM
 
 
-
-mkdir -p $LOG_DIR;
+if [ ! -d "$LOG_DIR" ] 
+then
+	mkdir $LOG_DIR;
+fi 
 
 DTD_LOCATION="$SCRIPT_DIR/lib/tsung-1.0.dtd";
 
@@ -134,16 +137,23 @@ sed -i "1i<!DOCTYPE tsung SYSTEM \"$DTD_LOCATION\">" $GEN_TEST_PLAN;
 log_exist_status()
 {
 	S_LOG=$1;
-	echo $(wget -T 100 -t 1 "$JMXURL" -O $S_LOG -o /dev/stdout )
+	
+	result=$(curl -s -f --connect-timeout 5 "$JMXURL" | sed -e "s/<?xml.*?>//g")
+	echo $result >> $S_LOG;
+	echo $result;
 }
 
+
 TSUNG_LOG_ACTUALLY="$LOG_DIR/$CUR_DATETIME";
-STATUS_LOG="$TSUNG_LOG_ACTUALLY/exist_status.xml";
+STATUS_LOG="$TSUNG_LOG_ACTUALLY/status.xml";
+
+mkdir $TSUNG_LOG_ACTUALLY;
+echo "<status>" > $STATUS_LOG
 
 monitor_exist()
 {
 	result=""
-	sleep 5;
+	sleep 2;
 	
 	#echo -e "\nLogging eXist status to: $STATUS_LOG\n";
 	
@@ -151,8 +161,9 @@ monitor_exist()
 	do
 	result=$(log_exist_status $STATUS_LOG)
 	
+	echo "Monitor result: $result";
 	
-	if [ "$(echo $result | grep '200 OK' )" = "" ] 
+	if [ "$result" = "" ] 
 	then
 	
 		echo -e "WARNING: Could not retireve eXist JMX status at: $JMXURL.\nSystem may be unresponsive.";
@@ -189,6 +200,7 @@ on_exit()
 	test_cleanup
 	tsung stop > /dev/null
 	log_exist_status $STATUS_LOG > /dev/null
+	echo "</status>" >> $STATUS_LOG
 	# Need to exit the script explicitly when done.
 	# Otherwise the script would live on, until system
 	# realy goes down, and KILL signals are send.
